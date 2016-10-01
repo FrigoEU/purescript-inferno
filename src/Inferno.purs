@@ -3,7 +3,7 @@ module Inferno where
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import DOM.Node.Types (Element)
-import Data.Function.Uncurried (Fn2, Fn5, runFn9, Fn9, Fn3)
+import Data.Function.Uncurried (runFn3, Fn2, Fn5, runFn9, Fn9, Fn3)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toNullable, Nullable)
 import Data.StrMap (StrMap)
@@ -24,10 +24,14 @@ foreign import data OptElementF :: *
 foreign import data INFERNO :: !
 
 foreign import render ::
-  forall eff. Fn2 INode Element (Eff (dom :: DOM, inferno :: INFERNO | eff) Unit)
+  forall eff. INode -> Element -> (Eff (dom :: DOM, inferno :: INFERNO | eff) Unit)
 foreign import prop :: forall a. String -> a -> Prop
 foreign import props :: Array Prop -> Props
-foreign import staticVElement :: Fn3 String Props (Array StaticVElement) StaticVElement
+foreign import _staticVElement :: Fn3 String Props (Array StaticVElement) StaticVElement
+
+staticVElement :: String -> Props -> Array StaticVElement -> StaticVElement
+staticVElement = runFn3 _staticVElement
+
 foreign import createOptBlueprint ::
   forall a b c d.
   Fn9
@@ -38,6 +42,7 @@ foreign import createOptBlueprint ::
   (Nullable Int) (Nullable d)
   BluePrint
   -- Je kan ook nog verder gaan door arrays door te geven maar nog niet geïmpleemnteerd
+
 
 data ChildrenType a = ChildrenType Int
 nonKeyed :: ChildrenType (Array INode) -- TODO should support all NodeTypes
@@ -54,6 +59,7 @@ foreign import data INode :: *
 data DynamicValue = NoDynamicValue
                   | DynamicValueInt Int
                   | DynamicValueString String
+
 
 -- | Int: volgnummer van ValueTypes
 -- | DynamicValue: Ofwel volgnummer van ChildrenType ofwel naam van Prop
@@ -78,6 +84,9 @@ valueD = mkDynamic 7 NoDynamicValue
 propD :: String -> Dynamic String
 propD propName = mkDynamic 8 (DynamicValueString propName)
 
+
+-- Kan ik die makeBP dingen in een keer doen zodat een BluePrint meteen
+--   een gewone functie wordt? Let wel dat performance nog hetzelfde blijft!
 
 -- misschien een beetje stom maar ok
 makeBP0 :: StaticVElement -> BluePrint0

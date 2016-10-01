@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "inferno": "1.0.0-alpha10",
+    "inferno-dom": "1.0.0-alpha10"
+  },
+  "scripts": {
+    "build": "pulp browserify --to app.js"
+  }
+}
